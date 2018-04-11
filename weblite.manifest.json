@@ -1,9 +1,17 @@
 {
   "name": "firework",
-  "instancable": false,
+  "instancable": true,
   "creator": false,
   "inline": true,
   "shareDB": false,
   "width": 300,
-  "height": 300
+  "height": 300,
+  "customizeArray": [
+    {
+      "type": "text",
+      "name": "text",
+      "title": "Text",
+      "detail": { "placeholder": "happy birthday" }
+    }
+  ]
 }

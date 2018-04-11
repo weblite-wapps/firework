@@ -135,3 +135,7 @@ setCanvasSize();
 window.addEventListener('resize', setCanvasSize, false);
 
 W.start()
+W.loadData().then(function(o) {
+  const text = (o.customize && o.customize.text) || "happy birthday"
+  document.getElementById('text').innerHTML = text
+})

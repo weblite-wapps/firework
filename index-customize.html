@@ -20,4 +20,10 @@
   <script src="https://weblite.me:3000/code/wappLibs/core" charset="utf-8"></script>
   <script src="anime.min.js" charset="utf-8"></script>
   <script src="index.js"></script>
+  <script>
+    W.onChangeValue(function(o) {
+      if (o.key === 'text') document.getElementById('text').innerHTML = o.value
+    })
+    W.changeCustomize(R.identity)
+  </script>
 </html>
