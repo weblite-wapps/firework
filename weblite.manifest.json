@@ -8,7 +8,7 @@
   "height": 300,
   "customizeArray": [
     {
-      "type": "text",
+      "type": "textField",
       "name": "text",
       "title": "Text",
       "detail": { "placeholder": "happy birthday" }
