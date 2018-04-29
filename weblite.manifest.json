@@ -3,6 +3,7 @@
   "instancable": true,
   "creator": false,
   "inline": true,
+  "fullscreen": true,
   "shareDB": false,
   "width": 300,
   "height": 300,
@@ -13,5 +14,11 @@
       "title": "Text",
       "detail": { "placeholder": "happy birthday" }
     }
-  ]
+  ],
+  "servIndexes": {
+    "inline": "index",
+    "customize": "index",
+    "main": "index",
+    "fullscreen": "index"
+  }
 }
