@@ -2,7 +2,7 @@
   "name": "firework",
   "id": "5c4c2746e50e46486b155fc4",
   "searchable": true,
-  "instancable": true,
+  "instantiable": true,
   "creator": false,
   "inline": true,
   "fullscreen": true,
