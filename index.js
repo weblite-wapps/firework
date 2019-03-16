@@ -1,149 +1,172 @@
-window.human = false;
+/* eslint-disable no-undef */
 
-var canvasEl = document.querySelector('.fireworks');
-var ctx = canvasEl.getContext('2d');
-var numberOfParticules = 30;
-var pointerX = 0;
-var pointerY = 0;
-var tap = ('ontouchstart' in window || navigator.msMaxTouchPoints) ? 'touchstart' : 'mousedown';
-var colors = ['#FF1461', '#18FF92', '#5A87FF', '#FBF38C'];
+window.human = false
+
+const canvasEl = document.querySelector('.fireworks')
+const ctx = canvasEl.getContext('2d')
+const numberOfParticules = 30
+const tap =
+  'ontouchstart' in window || navigator.msMaxTouchPoints
+    ? 'touchstart'
+    : 'mousedown'
+
+const colors = ['#FF1461', '#18FF92', '#5A87FF', '#FBF38C']
+
+let pointerX = 0
+let pointerY = 0
 
 function setCanvasSize() {
-  canvasEl.width = window.innerWidth * 2;
-  canvasEl.height = window.innerHeight * 2;
-  canvasEl.style.width = window.innerWidth + 'px';
-  canvasEl.style.height = window.innerHeight + 'px';
-  canvasEl.getContext('2d').scale(2, 2);
+  canvasEl.width = window.innerWidth * 2
+  canvasEl.height = window.innerHeight * 2
+  canvasEl.style.width = `${window.innerWidth}'px'`
+  canvasEl.style.height = `${window.innerHeight}'px'`
+  canvasEl.getContext('2d').scale(2, 2)
 }
 
 function updateCoords(e) {
-  pointerX = e.clientX || e.touches[0].clientX;
-  pointerY = e.clientY || e.touches[0].clientY;
+  pointerX = e.clientX || e.touches[0].clientX
+  pointerY = e.clientY || e.touches[0].clientY
 }
 
 function setParticuleDirection(p) {
-  var angle = anime.random(0, 360) * Math.PI / 180;
-  var value = anime.random(50, 180);
-  var radius = [-1, 1][anime.random(0, 1)] * value;
+  const angle = (anime.random(0, 360) * Math.PI) / 180
+  const value = anime.random(50, 180)
+  const radius = [-1, 1][anime.random(0, 1)] * value
   return {
     x: p.x + radius * Math.cos(angle),
-    y: p.y + radius * Math.sin(angle)
+    y: p.y + radius * Math.sin(angle),
   }
 }
 
-function createParticule(x,y) {
-  var p = {};
-  p.x = x;
-  p.y = y;
-  p.color = colors[anime.random(0, colors.length - 1)];
-  p.radius = anime.random(16, 32);
-  p.endPos = setParticuleDirection(p);
-  p.draw = function() {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true);
-    ctx.fillStyle = p.color;
-    ctx.fill();
+function createParticule(x, y) {
+  const p = {}
+  p.x = x
+  p.y = y
+  p.color = colors[anime.random(0, colors.length - 1)]
+  p.radius = anime.random(16, 32)
+  p.endPos = setParticuleDirection(p)
+  p.draw = () => {
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true)
+    ctx.fillStyle = p.color
+    ctx.fill()
   }
-  return p;
+  return p
 }
 
-function createCircle(x,y) {
-  var p = {};
-  p.x = x;
-  p.y = y;
-  p.color = '#FFF';
-  p.radius = 0.1;
-  p.alpha = .5;
-  p.lineWidth = 6;
-  p.draw = function() {
-    ctx.globalAlpha = p.alpha;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true);
-    ctx.lineWidth = p.lineWidth;
-    ctx.strokeStyle = p.color;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+function createCircle(x, y) {
+  const p = {}
+  p.x = x
+  p.y = y
+  p.color = '#FFF'
+  p.radius = 0.1
+  p.alpha = 0.5
+  p.lineWidth = 6
+  p.draw = () => {
+    ctx.globalAlpha = p.alpha
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true)
+    ctx.lineWidth = p.lineWidth
+    ctx.strokeStyle = p.color
+    ctx.stroke()
+    ctx.globalAlpha = 1
   }
-  return p;
+  return p
 }
 
 function renderParticule(anim) {
-  for (var i = 0; i < anim.animatables.length; i++) {
-    anim.animatables[i].target.draw();
+  for (let i = 0; i < anim.animatables.length; i += 1) {
+    anim.animatables[i].target.draw()
   }
 }
 
 function animateParticules(x, y) {
-  var circle = createCircle(x, y);
-  var particules = [];
-  for (var i = 0; i < numberOfParticules; i++) {
-    particules.push(createParticule(x, y));
+  const circle = createCircle(x, y)
+  const particules = []
+  for (let i = 0; i < numberOfParticules; i += 1) {
+    particules.push(createParticule(x, y))
   }
-  anime.timeline().add({
-    targets: particules,
-    x: function(p) { return p.endPos.x; },
-    y: function(p) { return p.endPos.y; },
-    radius: 0.1,
-    duration: anime.random(1200, 1800),
-    easing: 'easeOutExpo',
-    update: renderParticule
-  })
+  anime
+    .timeline()
     .add({
-    targets: circle,
-    radius: anime.random(80, 160),
-    lineWidth: 0,
-    alpha: {
-      value: 0,
-      easing: 'linear',
-      duration: anime.random(600, 800),
-    },
-    duration: anime.random(1200, 1800),
-    easing: 'easeOutExpo',
-    update: renderParticule,
-    offset: 0
-  });
+      targets: particules,
+      x(p) {
+        return p.endPos.x
+      },
+      y(p) {
+        return p.endPos.y
+      },
+      radius: 0.1,
+      duration: anime.random(1200, 1800),
+      easing: 'easeOutExpo',
+      update: renderParticule,
+    })
+    .add({
+      targets: circle,
+      radius: anime.random(80, 160),
+      lineWidth: 0,
+      alpha: {
+        value: 0,
+        easing: 'linear',
+        duration: anime.random(600, 800),
+      },
+      duration: anime.random(1200, 1800),
+      easing: 'easeOutExpo',
+      update: renderParticule,
+      offset: 0,
+    })
 }
 
-var render = anime({
+const render = anime({
   duration: Infinity,
-  update: function() {
-    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-  }
-});
+  update() {
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height)
+  },
+})
 
-document.addEventListener(tap, function(e) {
-  window.human = true;
-  render.play();
-  updateCoords(e);
-  animateParticules(pointerX, pointerY);
-}, false);
+document.addEventListener(
+  tap,
+  e => {
+    window.human = true
+    render.play()
+    updateCoords(e)
+    animateParticules(pointerX, pointerY)
+  },
+  false,
+)
 
-var centerX = window.innerWidth / 2;
-var centerY = window.innerHeight / 2;
+const centerX = window.innerWidth / 2
+const centerY = window.innerHeight / 2
 
 function autoClick() {
-  if (window.human) return;
+  if (window.human) return
   animateParticules(
-    anime.random(centerX-50, centerX+50),
-    anime.random(centerY-50, centerY+50)
-  );
-  anime({duration: 200}).finished.then(autoClick);
+    anime.random(centerX - 50, centerX + 50),
+    anime.random(centerY - 50, centerY + 50),
+  )
+  anime({ duration: 200 }).finished.then(autoClick)
 }
 
-autoClick();
-setCanvasSize();
-window.addEventListener('resize', setCanvasSize, false);
+autoClick()
+setCanvasSize()
+window.addEventListener('resize', setCanvasSize, false)
 
+W.setHooks({
+  wappWillStart(start, error, { mode }) {
+    if (mode === 'customize') {
+      start()
+      return
+    }
 
-W.start()
+    W.loadData().then(({ customize }) => {
+      const text = (customize && customize.text) || 'Happy Birthday!'
+      document.getElementById('text').innerHTML = text
 
-W.loadData().then(function(o) {
-  const text = (o.customize && o.customize.text) || "happy birthday"
-  document.getElementById('text').innerHTML = text
+      start()
+    })
+  },
+
+  onCustomizeValueChange({ key, value }) {
+    if (key === 'text') document.getElementById('text').innerHTML = value
+  },
 })
-
-W.onChangeValue(function(o) {
-  if (o.key === 'text') document.getElementById('text').innerHTML = o.value
-})
-
-W.changeCustomize(R.identity)

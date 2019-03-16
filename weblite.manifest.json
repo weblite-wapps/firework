@@ -22,5 +22,6 @@
     "customize": "index",
     "main": "index",
     "fullscreen": "index"
-  }
+  },
+  "version": "1.0.0"
 }
