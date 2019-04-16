@@ -1,156 +1,163 @@
-/* eslint-disable no-undef */
+// helper functions
+const PI2 = Math.PI * 2
+const random = (min, max) => Math.random() * (max - min + 1) + min | 0
+const timestamp = _ => new Date().getTime()
 
-window.human = false
+// container
+class Birthday {
+  constructor() {
+    this.resize()
 
-const canvasEl = document.querySelector('.fireworks')
-const ctx = canvasEl.getContext('2d')
-const numberOfParticules = 30
-const tap =
-  'ontouchstart' in window || navigator.msMaxTouchPoints
-    ? 'touchstart'
-    : 'mousedown'
+    // create a lovely place to store the firework
+    this.fireworks = []
+    this.counter = 0
 
-const colors = ['#FF1461', '#18FF92', '#5A87FF', '#FBF38C']
+  }
+  
+  resize() {
+    this.width = canvas.width = window.innerWidth
+    let center = this.width / 2 | 0
+    this.spawnA = center - center / 4 | 0
+    this.spawnB = center + center / 4 | 0
+    
+    this.height = canvas.height = window.innerHeight
+    this.spawnC = this.height * .1
+    this.spawnD = this.height * .5
+    
+  }
+  
+  onClick(evt) {
+     let x = evt.clientX || evt.touches && evt.touches[0].pageX
+     let y = evt.clientY || evt.touches && evt.touches[0].pageY
+     
+     let count = random(3,5)
+     for(let i = 0; i < count; i++) this.fireworks.push(new Firework(
+        random(this.spawnA, this.spawnB),
+        this.height,
+        x,
+        y,
+        random(0, 260),
+        random(30, 110)))
+          
+     this.counter = -1
+     
+  }
+  
+  update(delta) {
+    ctx.globalCompositeOperation = 'hard-light'
+    ctx.fillStyle = `rgba(20,20,20,${ 7 * delta })`
+    ctx.fillRect(0, 0, this.width, this.height)
 
-let pointerX = 0
-let pointerY = 0
+    ctx.globalCompositeOperation = 'lighter'
+    for (let firework of this.fireworks) firework.update(delta)
 
-function setCanvasSize() {
-  canvasEl.width = window.innerWidth * 2
-  canvasEl.height = window.innerHeight * 2
-  canvasEl.style.width = `${window.innerWidth}'px'`
-  canvasEl.style.height = `${window.innerHeight}'px'`
-  canvasEl.getContext('2d').scale(2, 2)
-}
+    // if enough time passed... create new new firework
+    this.counter += delta * 3 // each second
+    if (this.counter >= 1) {
+      this.fireworks.push(new Firework(
+        random(this.spawnA, this.spawnB),
+        this.height,
+        random(0, this.width),
+        random(this.spawnC, this.spawnD),
+        random(0, 360),
+        random(30, 110)))
+      this.counter = 0
+    }
 
-function updateCoords(e) {
-  pointerX = e.clientX || e.touches[0].clientX
-  pointerY = e.clientY || e.touches[0].clientY
-}
+    // remove the dead fireworks
+    if (this.fireworks.length > 1000) this.fireworks = this.fireworks.filter(firework => !firework.dead)
 
-function setParticuleDirection(p) {
-  const angle = (anime.random(0, 360) * Math.PI) / 180
-  const value = anime.random(50, 180)
-  const radius = [-1, 1][anime.random(0, 1)] * value
-  return {
-    x: p.x + radius * Math.cos(angle),
-    y: p.y + radius * Math.sin(angle),
   }
 }
 
-function createParticule(x, y) {
-  const p = {}
-  p.x = x
-  p.y = y
-  p.color = colors[anime.random(0, colors.length - 1)]
-  p.radius = anime.random(16, 32)
-  p.endPos = setParticuleDirection(p)
-  p.draw = () => {
-    ctx.beginPath()
-    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true)
-    ctx.fillStyle = p.color
-    ctx.fill()
+class Firework {
+  constructor(x, y, targetX, targetY, shade, offsprings) {
+    this.dead = false
+    this.offsprings = offsprings
+
+    this.x = x
+    this.y = y
+    this.targetX = targetX
+    this.targetY = targetY
+
+    this.shade = shade
+    this.history = []
   }
-  return p
-}
+  update(delta) {
+    if (this.dead) return
 
-function createCircle(x, y) {
-  const p = {}
-  p.x = x
-  p.y = y
-  p.color = '#FFF'
-  p.radius = 0.1
-  p.alpha = 0.5
-  p.lineWidth = 6
-  p.draw = () => {
-    ctx.globalAlpha = p.alpha
-    ctx.beginPath()
-    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI, true)
-    ctx.lineWidth = p.lineWidth
-    ctx.strokeStyle = p.color
-    ctx.stroke()
-    ctx.globalAlpha = 1
+    let xDiff = this.targetX - this.x
+    let yDiff = this.targetY - this.y
+    if (Math.abs(xDiff) > 3 || Math.abs(yDiff) > 3) { // is still moving
+      this.x += xDiff * 2 * delta
+      this.y += yDiff * 2 * delta
+
+      this.history.push({
+        x: this.x,
+        y: this.y
+      })
+
+      if (this.history.length > 20) this.history.shift()
+
+    } else {
+      if (this.offsprings && !this.madeChilds) {
+        
+        let babies = this.offsprings / 2
+        for (let i = 0; i < babies; i++) {
+          let targetX = this.x + this.offsprings * Math.cos(PI2 * i / babies) | 0
+          let targetY = this.y + this.offsprings * Math.sin(PI2 * i / babies) | 0
+
+          birthday.fireworks.push(new Firework(this.x, this.y, targetX, targetY, this.shade, 0))
+
+        }
+
+      }
+      this.madeChilds = true
+      this.history.shift()
+    }
+    
+    if (this.history.length === 0) this.dead = true
+    else if (this.offsprings) { 
+        for (let i = 0; this.history.length > i; i++) {
+          let point = this.history[i]
+          ctx.beginPath()
+          ctx.fillStyle = 'hsl(' + this.shade + ',100%,' + i + '%)'
+          ctx.arc(point.x, point.y, 1, 0, PI2, false)
+          ctx.fill()
+        } 
+      } else {
+      ctx.beginPath()
+      ctx.fillStyle = 'hsl(' + this.shade + ',100%,50%)'
+      ctx.arc(this.x, this.y, 1, 0, PI2, false)
+      ctx.fill()
+    }
+
   }
-  return p
 }
 
-function renderParticule(anim) {
-  for (let i = 0; i < anim.animatables.length; i += 1) {
-    anim.animatables[i].target.draw()
-  }
-}
+let canvas = document.getElementById('birthday')
+let ctx = canvas.getContext('2d')
 
-function animateParticules(x, y) {
-  const circle = createCircle(x, y)
-  const particules = []
-  for (let i = 0; i < numberOfParticules; i += 1) {
-    particules.push(createParticule(x, y))
-  }
-  anime
-    .timeline()
-    .add({
-      targets: particules,
-      x(p) {
-        return p.endPos.x
-      },
-      y(p) {
-        return p.endPos.y
-      },
-      radius: 0.1,
-      duration: anime.random(1200, 1800),
-      easing: 'easeOutExpo',
-      update: renderParticule,
-    })
-    .add({
-      targets: circle,
-      radius: anime.random(80, 160),
-      lineWidth: 0,
-      alpha: {
-        value: 0,
-        easing: 'linear',
-        duration: anime.random(600, 800),
-      },
-      duration: anime.random(1200, 1800),
-      easing: 'easeOutExpo',
-      update: renderParticule,
-      offset: 0,
-    })
-}
+let then = timestamp()
 
-const render = anime({
-  duration: Infinity,
-  update() {
-    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height)
-  },
-})
+let birthday = new Birthday
+window.onresize = () => birthday.resize()
+document.onclick = evt => birthday.onClick(evt)
+document.ontouchstart = evt => birthday.onClick(evt)
 
-document.addEventListener(
-  tap,
-  e => {
-    window.human = true
-    render.play()
-    updateCoords(e)
-    animateParticules(pointerX, pointerY)
-  },
-  false,
-)
+  ;(function loop(){
+  	requestAnimationFrame(loop)
 
-const centerX = window.innerWidth / 2
-const centerY = window.innerHeight / 2
+  	let now = timestamp()
+  	let delta = now - then
 
-function autoClick() {
-  if (window.human) return
-  animateParticules(
-    anime.random(centerX - 50, centerX + 50),
-    anime.random(centerY - 50, centerY + 50),
-  )
-  anime({ duration: 200 }).finished.then(autoClick)
-}
+    then = now
+    birthday.update(delta / 1000)
+  	
 
-autoClick()
-setCanvasSize()
-window.addEventListener('resize', setCanvasSize, false)
+  })()
 
+  
 W.setHooks({
   wappWillStart(start, error, { mode }) {
     if (mode === 'customize') {
