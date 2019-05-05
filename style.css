@@ -17,8 +17,9 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Source Sans Pro";
-  font-size: 2.5em;
+  text-align: center;
+  font-family: "Source Sans Pro", Helvetica, sans-serif;
+  font-size: 2em;
   font-weight: 900;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
